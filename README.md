@@ -137,4 +137,7 @@ The application exposes the following API endpoints:
 - The default expiration time for cached photos is set to 3600 seconds (1 hour). You can modify this value by changing
   the `DEFAULT_EXPIRATION` constant in the `server.js` file.
 
+Refer below tutorial for more details:
+https://youtu.be/jgpVdJB2sKQ
+
 Feel free to modify and extend this application according to your needs. Happy coding!
