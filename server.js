@@ -15,22 +15,29 @@ app.use(express.urlencoded({extended: true}));
 app.use(cors());
 
 app.get("/photos", async (req, res) => {
-        const albumId = req.query.albumId;
+    const albumId = req.query.albumId;
 
-        const photos = await redisClient.get("photos");
+    /**
+     * 1. Check if photos for the given albumId is present in the cache.
+     * 2. If yes, then return the response from the cache.
+     * 3. If not, then fetch the response from the API and store it in the cache for future use.
+     * 4. Here using albumId in key makes sure that we are
+     *    caching photos for each album separately.
+     */
+    const photos = await redisClient.get(`photos?albumId=${albumId}`);
 
-        if (photos != null) {
-            console.log("cache hit");
-            return res.json(JSON.parse(photos));
-        }
+    if (photos != null) {
+        console.log("cache hit");
+        return res.json(JSON.parse(photos));
+    }
 
-        const {data} = await axios.get(
-            "https://jsonplaceholder.typicode.com/photos",
-            {params: {albumId}}
-        );
+    const {data} = await axios.get(
+        "https://jsonplaceholder.typicode.com/photos",
+        {params: {albumId}}
+    );
 
-        await redisClient.setEx("photos", DEFAULT_EXPIRATION, JSON.stringify(data));
-        console.log("cache miss");
+    await redisClient.setEx(`photos?albumId=${albumId}`, DEFAULT_EXPIRATION, JSON.stringify(data));
+    console.log("cache miss");
         res.json(data);
     }
 );
